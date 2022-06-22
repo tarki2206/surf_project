@@ -8,6 +8,7 @@ __pycache__/
 
 credentials/
 .idea/
+static/
 
 # Distribution / packaging
 .Python
