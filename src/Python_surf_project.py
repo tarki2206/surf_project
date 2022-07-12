@@ -26,6 +26,19 @@ def search_weather_by_time(response_water, requested_time: str):
     print(count)
 
 
+def create_local_json_file(path_to_folder: str, file_name: str, url: str, params: dict, headers: dict) -> None:
+    response_storm_glass = requests.get(
+        url=url,
+        params=params,
+        headers=headers
+    )
+
+    path = path_to_folder + '/' + file_name
+
+    with open(path, 'w+') as json_file:
+        json.dump(response_storm_glass.json(), json_file, indent=4)
+
+
 def get_data_from_stormglass():
     url_storm_glass = 'https://api.stormglass.io/v2/weather/point'
     params_storm_glass = {
@@ -39,30 +52,29 @@ def get_data_from_stormglass():
         if os.path.isfile('../static/StormGlassData.json'):
             print('reading from local file')
         else:
-            response_storm_glass = requests.get(
+            create_local_json_file(
+                path_to_folder='../static',
+                file_name='StormGlassData.json',
                 url=url_storm_glass,
                 params=params_storm_glass,
                 headers=headers_storm_glass
             )
-
-            with open('../static/StormGlassData.json', 'w+') as json_file:
-                json.dump(response_storm_glass.json(), json_file, indent=4)
     else:
         os.mkdir('../static')
-        response_storm_glass = requests.get(
+        create_local_json_file(
+            path_to_folder='../static',
+            file_name='StormGlassData.json',
             url=url_storm_glass,
             params=params_storm_glass,
             headers=headers_storm_glass
         )
-
-        with open('../static/StormGlassData.json', 'w+') as json_file:
-            json.dump(response_storm_glass.json(), json_file, indent=4)
     return 0
 
 
 def get_data_from_openweathermap():
     url_openweather = 'https://api.openweathermap.org/data/3.0/onecall'
     params_openweather = {'lat': REQUIRED_LATITUDE, 'lon': REQUIRED_LONGITUDE, 'appid': OPEN_WEATHER_KEY}
+
     response = requests.get(
         url=url_openweather,
         params=params_openweather
