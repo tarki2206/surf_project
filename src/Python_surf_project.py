@@ -27,7 +27,7 @@ def search_weather_by_time(response_water, requested_time: str):
 
 
 def create_local_json_file(path_to_folder: str, file_name: str, url: str, params: dict, headers: dict) -> None:
-    response_storm_glass = requests.get(
+    response = requests.get(
         url=url,
         params=params,
         headers=headers
@@ -36,7 +36,7 @@ def create_local_json_file(path_to_folder: str, file_name: str, url: str, params
     path = path_to_folder + '/' + file_name
 
     with open(path, 'w+') as json_file:
-        json.dump(response_storm_glass.json(), json_file, indent=4)
+        json.dump(response.json(), json_file, indent=4)
 
 
 def get_data_from_stormglass():
@@ -79,39 +79,57 @@ def get_data_from_openweathermap():
         url=url_openweather,
         params=params_openweather
     )
-    return response
+
+    if os.path.isdir('../static'):
+        if os.path.isfile('../static/openweathermapData.json'):
+            print('reading from local file')
+        else:
+            create_local_json_file(
+                path_to_folder='../static',
+                file_name='openweathermapData.json',
+                url=url_openweather,
+                params=params_openweather,
+                headers={}
+            )
+    else:
+        os.mkdir('../static')
+        create_local_json_file(
+            path_to_folder='../static',
+            file_name='openweathermapData.json',
+            url=url_openweather,
+            params=params_openweather,
+            headers={}
+        )
+
+    return 0
 
 
 if __name__ == '__main__':
 
-    print(get_data_from_openweathermap().text)
-    print(get_data_from_stormglass())
+    get_data_from_openweathermap()
+    with open('../static/openweathermapData.json', 'r') as f:
+        info_openweathermap = json.load(f)
 
-    # requested_time = '2022-06-21T00:00:00+00:00'
+    get_data_from_stormglass()
+    with open('../static/StormGlassData.json', 'r') as f:
+        response_stormglass = json.load(f)
 
-    # response = requests.get(f'https://api.openweathermap.org/data/3.0/onecall?lat={lat1}&lon={lon}&appid={key}')
-    # print(response_water.text)
-    # info = response.json()
-    # info_water = response_water.json()
-    # #water_temp = info_water['waterTemperature']
-    # #print(water_temp)
-    # print(info_water.keys())
-    #
-    #
-    #
-    # wind_speed = info['current']['wind_speed']
-    # time_sunrise = info['current']['sunrise']
-    # time_sunset = info['current']['sunset']
-    # sunrise = datetime.datetime.fromtimestamp(time_sunrise)
-    # sunset = datetime.datetime.fromtimestamp(time_sunset)
-    # current_time = datetime.datetime.now()
-    # if wind_speed > 4.00:
-    #     print(f'Time sunrise is {sunrise.time()}, time sunset is {sunset.time()}, wind is so strong for surfing {wind_speed}')
-    # else:
-    #     print(f'Time sunrise is {sunrise.time()}, time sunset is {sunset.time()}, wind speed is good for surfing {wind_speed}')
-    # current_time1 = str(current_time.time())
-    # print(f'Current time is {current_time1[:8]}')
-    # if sunrise < current_time < sunset :
-    #     print('Go to surf')
-    # else:
-    #     print('Too dark')
+    wind_speed = info_openweathermap['current']['wind_speed']
+    time_sunrise = info_openweathermap['current']['sunrise']
+    time_sunset = info_openweathermap['current']['sunset']
+
+    sunrise = datetime.datetime.fromtimestamp(time_sunrise)
+    sunset = datetime.datetime.fromtimestamp(time_sunset)
+    current_time = datetime.datetime.now()
+
+    if wind_speed > 4.00:
+        print(f'Time sunrise is {sunrise.time()}, time sunset is {sunset.time()}, '
+              f'wind is so strong for surfing {wind_speed}')
+    else:
+        print(f'Time sunrise is {sunrise.time()}, time sunset is {sunset.time()}, '
+              f'wind speed is good for surfing {wind_speed}')
+
+    if sunrise < current_time < sunset:
+        print('Go to surf')
+    else:
+        print('Too dark')

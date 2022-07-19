@@ -9,6 +9,8 @@ __pycache__/
 credentials/
 .idea/
 static/
+.DS_Store
+.DS_Store?
 
 # Distribution / packaging
 .Python
