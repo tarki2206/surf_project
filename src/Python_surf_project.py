@@ -26,7 +26,7 @@ def search_weather_by_time(response_water, requested_time: str):
     print(count)
 
 
-def create_local_json_file(path_to_folder: str, file_name: str, url: str, params: dict, headers: dict) -> None:
+def create_local_json_file(path_to_folder: str, file_name: str, url: str, params: dict, headers={}) -> None:
     response = requests.get(
         url=url,
         params=params,
@@ -51,6 +51,7 @@ def get_data_from_stormglass():
     if os.path.isdir('../static'):
         if os.path.isfile('../static/StormGlassData.json'):
             print('reading from local file')
+            return 0
         else:
             create_local_json_file(
                 path_to_folder='../static',
@@ -75,21 +76,16 @@ def get_data_from_openweathermap():
     url_openweather = 'https://api.openweathermap.org/data/3.0/onecall'
     params_openweather = {'lat': REQUIRED_LATITUDE, 'lon': REQUIRED_LONGITUDE, 'appid': OPEN_WEATHER_KEY}
 
-    response = requests.get(
-        url=url_openweather,
-        params=params_openweather
-    )
-
     if os.path.isdir('../static'):
         if os.path.isfile('../static/openweathermapData.json'):
             print('reading from local file')
+            return 0
         else:
             create_local_json_file(
                 path_to_folder='../static',
                 file_name='openweathermapData.json',
                 url=url_openweather,
-                params=params_openweather,
-                headers={}
+                params=params_openweather
             )
     else:
         os.mkdir('../static')
@@ -97,8 +93,7 @@ def get_data_from_openweathermap():
             path_to_folder='../static',
             file_name='openweathermapData.json',
             url=url_openweather,
-            params=params_openweather,
-            headers={}
+            params=params_openweather
         )
 
     return 0
@@ -106,11 +101,17 @@ def get_data_from_openweathermap():
 
 if __name__ == '__main__':
 
+    # Requesting openWeather API
     get_data_from_openweathermap()
+
+    # creating local file
     with open('../static/openweathermapData.json', 'r') as f:
         info_openweathermap = json.load(f)
 
+    # Requesting stormglass API
     get_data_from_stormglass()
+
+    # creating local file
     with open('../static/StormGlassData.json', 'r') as f:
         response_stormglass = json.load(f)
 
